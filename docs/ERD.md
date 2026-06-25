@@ -1,0 +1,202 @@
+# Database Design and ERD
+
+## Overview
+
+This document explains the database design for the Employee Leave Management System. The database stores users, employees, departments, leave types, leave requests, leave balances, holidays, and notifications.
+
+## Main Entities
+
+### 1. User
+
+Stores login and authentication details.
+
+Fields:
+- id
+- username
+- email
+- password
+- role
+- is_active
+- created_at
+
+Roles:
+- Employee
+- Manager
+- HR Admin
+
+---
+
+### 2. EmployeeProfile
+
+Stores employee-specific information.
+
+Fields:
+- id
+- user_id
+- employee_code
+- department_id
+- manager_id
+- designation
+- joining_date
+- phone
+- address
+
+---
+
+### 3. Department
+
+Stores department details.
+
+Fields:
+- id
+- name
+- description
+
+Examples:
+- HR
+- IT
+- Sales
+- Finance
+
+---
+
+### 4. LeaveType
+
+Stores different types of leaves.
+
+Fields:
+- id
+- name
+- total_days
+- carry_forward_allowed
+- is_paid
+- description
+
+Examples:
+- Sick Leave
+- Casual Leave
+- Paid Leave
+- Unpaid Leave
+
+---
+
+### 5. LeaveRequest
+
+Stores employee leave applications.
+
+Fields:
+- id
+- employee_id
+- leave_type_id
+- start_date
+- end_date
+- total_days
+- reason
+- status
+- manager_comment
+- applied_at
+- updated_at
+
+Status:
+- Pending
+- Approved
+- Rejected
+- Cancelled
+
+---
+
+### 6. LeaveBalance
+
+Stores leave balance for each employee.
+
+Fields:
+- id
+- employee_id
+- leave_type_id
+- total_allocated
+- used_leaves
+- remaining_leaves
+- year
+
+---
+
+### 7. Holiday
+
+Stores company holidays.
+
+Fields:
+- id
+- name
+- date
+- location
+- description
+
+---
+
+### 8. Notification
+
+Stores system notifications.
+
+Fields:
+- id
+- user_id
+- message
+- is_read
+- created_at
+
+---
+
+## Relationships
+
+User has one EmployeeProfile.
+
+Department has many EmployeeProfiles.
+
+EmployeeProfile has many LeaveRequests.
+
+LeaveType has many LeaveRequests.
+
+EmployeeProfile has many LeaveBalances.
+
+LeaveType has many LeaveBalances.
+
+User has many Notifications.
+
+## Simple ER Flow
+
+```text
+User
+ |
+ | 1:1
+ |
+EmployeeProfile
+ |
+ | many:1
+ |
+Department
+
+EmployeeProfile
+ |
+ | 1:many
+ |
+LeaveRequest
+ |
+ | many:1
+ |
+LeaveType
+
+EmployeeProfile
+ |
+ | 1:many
+ |
+LeaveBalance
+ |
+ | many:1
+ |
+LeaveType
+
+User
+ |
+ | 1:many
+ |
+Notification
