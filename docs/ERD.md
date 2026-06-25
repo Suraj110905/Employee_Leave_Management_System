@@ -201,6 +201,7 @@ User
  |
 Notification
 
+```mermaid
 erDiagram
     USER ||--|| EMPLOYEE_PROFILE : has
     DEPARTMENT ||--o{ EMPLOYEE_PROFILE : contains
@@ -286,3 +287,4 @@ erDiagram
         boolean is_read
         datetime created_at
     }
+    ```
