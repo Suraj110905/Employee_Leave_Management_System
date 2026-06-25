@@ -200,3 +200,89 @@ User
  | 1:many
  |
 Notification
+
+erDiagram
+    USER ||--|| EMPLOYEE_PROFILE : has
+    DEPARTMENT ||--o{ EMPLOYEE_PROFILE : contains
+    EMPLOYEE_PROFILE ||--o{ LEAVE_REQUEST : creates
+    LEAVE_TYPE ||--o{ LEAVE_REQUEST : used_for
+    EMPLOYEE_PROFILE ||--o{ LEAVE_BALANCE : owns
+    LEAVE_TYPE ||--o{ LEAVE_BALANCE : tracks
+    USER ||--o{ NOTIFICATION : receives
+
+    USER {
+        int id
+        string username
+        string email
+        string password
+        string role
+        boolean is_active
+        datetime created_at
+    }
+
+    EMPLOYEE_PROFILE {
+        int id
+        int user_id
+        string employee_code
+        int department_id
+        int manager_id
+        string designation
+        date joining_date
+        string phone
+        string address
+    }
+
+    DEPARTMENT {
+        int id
+        string name
+        string description
+    }
+
+    LEAVE_TYPE {
+        int id
+        string name
+        int total_days
+        boolean carry_forward_allowed
+        boolean is_paid
+        string description
+    }
+
+    LEAVE_REQUEST {
+        int id
+        int employee_id
+        int leave_type_id
+        date start_date
+        date end_date
+        int total_days
+        string reason
+        string status
+        string manager_comment
+        datetime applied_at
+        datetime updated_at
+    }
+
+    LEAVE_BALANCE {
+        int id
+        int employee_id
+        int leave_type_id
+        int total_allocated
+        int used_leaves
+        int remaining_leaves
+        int year
+    }
+
+    HOLIDAY {
+        int id
+        string name
+        date date
+        string location
+        string description
+    }
+
+    NOTIFICATION {
+        int id
+        int user_id
+        string message
+        boolean is_read
+        datetime created_at
+    }
