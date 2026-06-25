@@ -201,24 +201,25 @@ User
  |
 Notification
 
+# ER Diagram
+
 ```mermaid
 erDiagram
-    USER ||--|| EMPLOYEE_PROFILE : has
+    APP_USER ||--|| EMPLOYEE_PROFILE : has
     DEPARTMENT ||--o{ EMPLOYEE_PROFILE : contains
     EMPLOYEE_PROFILE ||--o{ LEAVE_REQUEST : creates
     LEAVE_TYPE ||--o{ LEAVE_REQUEST : used_for
     EMPLOYEE_PROFILE ||--o{ LEAVE_BALANCE : owns
     LEAVE_TYPE ||--o{ LEAVE_BALANCE : tracks
-    USER ||--o{ NOTIFICATION : receives
+    APP_USER ||--o{ NOTIFICATION : receives
 
-    USER {
+    APP_USER {
         int id
         string username
         string email
         string password
         string role
         boolean is_active
-        datetime created_at
     }
 
     EMPLOYEE_PROFILE {
@@ -229,8 +230,6 @@ erDiagram
         int manager_id
         string designation
         date joining_date
-        string phone
-        string address
     }
 
     DEPARTMENT {
@@ -245,7 +244,6 @@ erDiagram
         int total_days
         boolean carry_forward_allowed
         boolean is_paid
-        string description
     }
 
     LEAVE_REQUEST {
@@ -258,8 +256,6 @@ erDiagram
         string reason
         string status
         string manager_comment
-        datetime applied_at
-        datetime updated_at
     }
 
     LEAVE_BALANCE {
@@ -275,9 +271,8 @@ erDiagram
     HOLIDAY {
         int id
         string name
-        date date
+        date holiday_date
         string location
-        string description
     }
 
     NOTIFICATION {
@@ -285,6 +280,5 @@ erDiagram
         int user_id
         string message
         boolean is_read
-        datetime created_at
     }
-    ```
+```
