@@ -30,7 +30,7 @@
 * [x] Install Python
 * [x] Install Django
 * [x] Create virtual environment
-* [ ] Fix backend folder structure
+* [x] Fix backend folder structure
 * [ ] Create Django apps
 * [ ] Configure settings
 * [ ] First migration

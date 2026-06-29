@@ -77,3 +77,23 @@ Then check TODO.md.
 Then continue from the "Next Task" section.
 
 There is no need to remember everything because everything is written here.
+
+## Date: 30 June 2026
+
+### What I completed today
+
+* Fixed the project folder structure.
+* Moved `manage.py` into the `backend` folder.
+* Recreated the virtual environment inside `backend`.
+* Reinstalled Django.
+* Verified that the project runs correctly.
+
+### Why I did this
+
+Keeping all backend-related files inside one folder makes the project cleaner, easier to maintain, and follows common Django project organization.
+
+### Next Task
+
+* Create Django apps.
+* Register them in `settings.py`.
+* Start building the database models.
