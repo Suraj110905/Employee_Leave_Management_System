@@ -97,3 +97,24 @@ Keeping all backend-related files inside one folder makes the project cleaner, e
 * Create Django apps.
 * Register them in `settings.py`.
 * Start building the database models.
+
+## Date: 09 July 2026
+
+### What I completed today
+
+* Changed the development strategy from backend-first to frontend-first.
+* Decided to build the complete user interface before implementing the backend.
+* Finalized the application screens for Employee, Manager, and HR Admin.
+* Planned the frontend development order so that reusable components are built first.
+
+### Why I changed the approach
+
+Building the frontend first will help me visualize the complete application, understand the data requirements for each page, and design cleaner REST APIs when I start the backend.
+
+### Current Status
+
+The project planning and system design are complete. I am now entering the frontend architecture and UI development phase.
+
+### Next Task
+
+Design the frontend architecture, routing structure, and reusable components before starting the Login page.
