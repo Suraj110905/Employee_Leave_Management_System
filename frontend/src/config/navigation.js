@@ -7,98 +7,116 @@ import {
   ClipboardList,
   Calendar,
   Users,
-  Building2,
   Settings2,
   Palmtree,
   BarChart3,
   Settings,
 } from "lucide-react";
+import { ROLES } from "@/constants/roles";
 
 export const employeeNavigation = [
   {
-    name: "Dashboard",
-    path: "/employee/dashboard",
+    label: "Dashboard",
+    route: "/employee/dashboard",
     icon: LayoutDashboard,
+    role: ROLES.EMPLOYEE,
   },
   {
-    name: "Apply Leave",
-    path: "/employee/apply-leave",
+    label: "Apply Leave",
+    route: "/employee/apply-leave",
     icon: CalendarPlus,
+    role: ROLES.EMPLOYEE,
   },
   {
-    name: "Leave History",
-    path: "/employee/history",
+    label: "Leave History",
+    route: "/employee/history",
     icon: History,
+    role: ROLES.EMPLOYEE,
   },
   {
-    name: "Leave Balance",
-    path: "/employee/balance",
+    label: "Leave Balance",
+    route: "/employee/balance",
     icon: Wallet,
+    role: ROLES.EMPLOYEE,
   },
   {
-    name: "Profile",
-    path: "/employee/profile",
+    label: "Profile",
+    route: "/employee/profile",
     icon: User,
+    role: ROLES.EMPLOYEE,
   },
 ];
 
 export const managerNavigation = [
   {
-    name: "Dashboard",
-    path: "/manager/dashboard",
+    label: "Dashboard",
+    route: "/manager/dashboard",
     icon: LayoutDashboard,
+    role: ROLES.MANAGER,
   },
   {
-    name: "Pending Requests",
-    path: "/manager/requests",
+    label: "Pending Requests",
+    route: "/manager/requests",
     icon: ClipboardList,
+    role: ROLES.MANAGER,
   },
   {
-    name: "Team Calendar",
-    path: "/manager/calendar",
+    label: "Team Calendar",
+    route: "/manager/calendar",
     icon: Calendar,
+    role: ROLES.MANAGER,
   },
   {
-    name: "Profile",
-    path: "/manager/profile",
-    icon: User,
+    label: "Team Members",
+    route: "/manager/members",
+    icon: Users,
+    role: ROLES.MANAGER,
   },
 ];
 
 export const adminNavigation = [
   {
-    name: "Dashboard",
-    path: "/admin/dashboard",
+    label: "Dashboard",
+    route: "/admin/dashboard",
     icon: LayoutDashboard,
+    role: ROLES.HR_ADMIN,
   },
   {
-    name: "Employees",
-    path: "/admin/employees",
+    label: "Employees",
+    route: "/admin/employees",
     icon: Users,
+    role: ROLES.HR_ADMIN,
   },
   {
-    name: "Departments",
-    path: "/admin/departments",
-    icon: Building2,
-  },
-  {
-    name: "Leave Types",
-    path: "/admin/leave-types",
+    label: "Leave Types",
+    route: "/admin/leave-types",
     icon: Settings2,
+    role: ROLES.HR_ADMIN,
   },
   {
-    name: "Holidays",
-    path: "/admin/holidays",
+    label: "Holidays",
+    route: "/admin/holidays",
     icon: Palmtree,
+    role: ROLES.HR_ADMIN,
   },
   {
-    name: "Reports",
-    path: "/admin/reports",
+    label: "Reports",
+    route: "/admin/reports",
     icon: BarChart3,
+    role: ROLES.HR_ADMIN,
   },
   {
-    name: "Settings",
-    path: "/admin/settings",
+    label: "Settings",
+    route: "/admin/settings",
     icon: Settings,
+    role: ROLES.HR_ADMIN,
   },
 ];
+
+// Combined navigation list helper for dynamic rendering based on active role
+export const navigationConfig = {
+  [ROLES.EMPLOYEE]: employeeNavigation,
+  [ROLES.MANAGER]: managerNavigation,
+  [ROLES.HR_ADMIN]: adminNavigation,
+};
+export default navigationConfig;

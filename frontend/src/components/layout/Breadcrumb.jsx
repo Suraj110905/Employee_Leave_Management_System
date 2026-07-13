@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 
@@ -33,15 +32,3 @@ export default function Breadcrumb({ items = [] }) {
     </nav>
   );
 }
-
-Breadcrumb.propTypes = {
-  items: PropTypes.arrayOf(
-    PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.shape({
-        label: PropTypes.string.isRequired,
-        path: PropTypes.string,
-      }),
-    ])
-  ),
-};

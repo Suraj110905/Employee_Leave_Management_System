@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Lock, Mail, ChevronRight, UserCheck } from "lucide-react";
 
 export default function Login() {
@@ -16,6 +16,38 @@ export default function Login() {
     // Mock authentication delay
     setTimeout(() => {
       setIsLoading(false);
+
+      // Establish session credentials in storage
+      localStorage.setItem("isAuthenticated", "true");
+
+      let userObj = {
+        name: "John Doe",
+        email: email || "john.doe@leaveportal.com",
+        role: "employee",
+        label: "Software Engineer",
+        avatar: "",
+      };
+
+      if (role === "admin") {
+        userObj = {
+          name: "Admin User",
+          email: email || "admin@leaveportal.com",
+          role: "hr_admin",
+          label: "HR Lead Specialist",
+          avatar: "",
+        };
+      } else if (role === "manager") {
+        userObj = {
+          name: "Sarah Hansen",
+          email: email || "sarah.hansen@leaveportal.com",
+          role: "manager",
+          label: "Engineering Manager",
+          avatar: "",
+        };
+      }
+
+      localStorage.setItem("user", JSON.stringify(userObj));
+
       // Redirect based on selected role
       if (role === "admin") {
         navigate("/admin/dashboard");
@@ -79,9 +111,9 @@ export default function Login() {
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Password
             </label>
-            <a href="#" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+            <Link to="/forgot-password" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
               Forgot?
-            </a>
+            </Link>
           </div>
           <div className="relative">
             <Lock className="absolute left-3.5 top-3 w-5 h-5 text-slate-400" />
