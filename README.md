@@ -36,11 +36,10 @@ The objective of this project is to automate the employee leave management proce
 
 ## Tech Stack
 
-- HTML
-- CSS
-- JavaScript
-- Django
-- SQLite / MySQL
+- React.js (Frontend)
+- Node.js & Express.js (Backend)
+- MongoDB Atlas (Database)
+- Tailwind CSS & shadcn/ui (Styling)
 
 ## Current Status
 

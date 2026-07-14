@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Layout components
 import PublicLayout from "@/layouts/PublicLayout";
@@ -9,11 +9,13 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import ProtectedRoute from "@/middleware/ProtectedRoute";
 import RoleProtectedRoute from "@/middleware/RoleProtectedRoute";
 
+// Auth context hook
+import { useAuth } from "@/context/AuthContext";
+
 // Constants & Mock data
 import { ROUTES } from "@/constants/routes";
 import { ROLES } from "@/constants/roles";
 import { SIDEBAR_ITEMS } from "@/constants/sidebar";
-import { DUMMY_USERS } from "@/data/dummyUser";
 import { DUMMY_NOTIFICATIONS } from "@/data/notifications";
 
 // Lazy loading all page views
@@ -64,28 +66,16 @@ function LoadingSpinner() {
  * Feeds current authenticated user and navigation config objects dynamically into layouts.
  */
 function DashboardLayoutWrapper() {
-  const navigate = useNavigate();
-
-  // Load profile from auth storage
-  const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-  const userObj = storedUser ? JSON.parse(storedUser) : DUMMY_USERS.employee;
-  const role = userObj?.role || ROLES.EMPLOYEE;
-
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("isAuthenticated");
-    sessionStorage.removeItem("user");
-    navigate(ROUTES.LOGIN);
-  };
+  const { user, logout } = useAuth();
+  const role = user?.role || ROLES.EMPLOYEE;
 
   return (
     <DashboardLayout
-      user={userObj}
+      user={user}
       notifications={DUMMY_NOTIFICATIONS}
       role={role}
       sidebarItems={SIDEBAR_ITEMS[role] || []}
-      onLogout={handleLogout}
+      onLogout={logout}
     />
   );
 }

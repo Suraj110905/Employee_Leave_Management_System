@@ -27,22 +27,22 @@
 
 ### Phase 3 - Backend Setup 🟡
 
-* [x] Install Python
-* [x] Install Django
-* [x] Create virtual environment
-* [x] Fix backend folder structure
-* [ ] Create Django apps
-* [ ] Configure settings
-* [ ] First migration
-* [ ] Create superuser
+* [x] Install Node.js & npm
+* [x] Initialize backend project
+* [x] Install dependencies (express, mongoose, cors, dotenv, jsonwebtoken, bcrypt)
+* [x] Configure backend folder structure
+* [ ] Create server.js entrypoint
+* [ ] Configure environment variables
+* [ ] Connect MongoDB database
 
 ---
 
-### Phase 4 - Database
+### Phase 4 - Database (MongoDB & Mongoose)
 
-* [ ] Create models
-* [ ] Run migrations
-* [ ] Register models in admin
+* [ ] Define Mongoose Schemas (User, LeaveRequest, Department, Holiday, LeaveType)
+* [ ] Create Seed Data script
+* [ ] Register database indexes
+
 
 ---
 

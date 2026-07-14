@@ -45,16 +45,9 @@ export default function MobileSidebar({
   const userInitial = getInitials(name);
   const activeRole = role || userRole;
 
-  const getAvatarBg = () => {
-    const roleLower = activeRole?.toLowerCase();
-    if (roleLower === "admin" || roleLower === "hr_admin") {
-      return "bg-teal-600 text-white font-bold";
-    }
-    if (roleLower === "manager") {
-      return "bg-indigo-600 text-white font-bold";
-    }
-    return "bg-emerald-600 text-white font-bold";
-  };
+  /** Mobile sidebar avatar bg — unified primary green for all roles */
+  const getAvatarBg = () => "bg-primary text-primary-foreground font-bold";
+
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>

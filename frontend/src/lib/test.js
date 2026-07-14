@@ -1,1 +1,0 @@
-export const appName = "Employee Leave Management System";

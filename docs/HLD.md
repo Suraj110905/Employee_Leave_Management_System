@@ -3,13 +3,11 @@
 ## System Architecture
 
 ```text
-Browser (HTML + CSS + JavaScript)
-                ↓
-         Django Backend
-                ↓
-        Business Logic Layer
-                ↓
-        SQLite / MySQL Database
+       Web Browser (React Frontend)
+                    ↓  HTTPS (REST API)
+          Node.js + Express Backend
+                    ↓  Mongoose ODM Queries
+           MongoDB Atlas (NoSQL)
 ```
 
 ---
@@ -19,53 +17,52 @@ Browser (HTML + CSS + JavaScript)
 ### Authentication Module
 
 Responsibilities:
-
-* User login
-* Session management
-* Role-based access
+* User registration & login
+* JWT (JSON Web Tokens) session handling
+* Role-based access control (RBAC) middleware
 
 ---
 
 ### Employee Module
 
 Responsibilities:
-
-* Leave applications
-* Leave history
-* Leave balances
-* Profile management
+* Leave applications (`POST /api/leaves`)
+* Leave history lookup
+* Leave balances dashboard preview
+* Profile update & mock file uploads (Multer middleware)
+* Leave report downloads
 
 ---
 
 ### Manager Module
 
 Responsibilities:
-
-* Approve or reject requests
-* Team leave calendar
-* Comments on requests
+* View team leave requests (`GET /api/leaves`)
+* Approve / reject requests (`PATCH /api/leaves/:id`)
+* Add manager review remarks / comments
+* View team leave calendar
+* Monitor leave balance allocation
+* Generate team reports
 
 ---
 
 ### HR Admin Module
 
 Responsibilities:
-
-* Employee management
-* Leave type configuration
-* Holiday management
-* Policy management
-* Reports
+* Employee directory CRUD management
+* Leave types policy configuration
+* Holiday calendar management
+* System reports generation
+* General system settings configuration
 
 ---
 
 ### Notification Module (Future)
 
 Responsibilities:
-
-* Email notifications
-* SMS notifications
-* Reminder alerts
+* Asynchronous email notifications
+* SMS alerts
+* Real-time WebSockets-based reminders
 
 ---
 
@@ -73,24 +70,25 @@ Responsibilities:
 
 Employee
 ↓
-Frontend
+React Frontend
 ↓
-Django Backend
+Node.js + Express Gateway
 ↓
-Database
+MongoDB Atlas Documents Store
 
 Manager
 ↓
-Approve/Reject
+Review Action
 ↓
-Backend
+Express REST API Routing
 ↓
-Update Leave Status
+Update Request Status (Mongoose Query)
 ↓
-Employee Notification
+Asynchronous Notification Dispatched
 
 ```
 ```
+
 ## System Design Diagram
 
-![HLD System Design](../screenshots/hld-system-design.png)
+![HLD System Design](../screenshots/hld-system-design-MERN.png)

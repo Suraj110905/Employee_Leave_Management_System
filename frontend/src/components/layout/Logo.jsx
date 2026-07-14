@@ -66,11 +66,11 @@ export default function Logo({ size = "md", showText = true, className = "" }) {
       {/* Brand Typography */}
       {showText && (
         <div className="flex flex-col select-none text-left">
-          <span className={`${currentSize.title} text-slate-800`}>
-            Employee Leave
+          <span className={`${currentSize.title} text-sidebar-foreground`}>
+            ELMS
           </span>
-          <span className={`${currentSize.subtitle} text-slate-500`}>
-            Management System
+          <span className={`${currentSize.subtitle} text-sidebar-foreground/50`}>
+            Leave Portal
           </span>
         </div>
       )}

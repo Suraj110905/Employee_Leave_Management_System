@@ -54,27 +54,11 @@ export default function Topbar({
   const userInitial = getInitials(name);
   const unreadCount = (notifications || []).filter((n) => !n.read).length;
 
-  const getAvatarBg = () => {
-    const roleLower = role?.toLowerCase();
-    if (roleLower === "admin" || roleLower === "hr_admin") {
-      return "bg-teal-100 text-teal-800 border-teal-200";
-    }
-    if (roleLower === "manager") {
-      return "bg-indigo-100 text-indigo-800 border-indigo-200";
-    }
-    return "bg-emerald-100 text-emerald-800 border-emerald-200";
-  };
+  /** Topbar avatar — unified primary green for all roles */
+  const getAvatarBg = () => "bg-primary/15 text-primary border-primary/20";
 
-  const getBadgeColor = () => {
-    const roleLower = role?.toLowerCase();
-    if (roleLower === "admin" || roleLower === "hr_admin") {
-      return "bg-teal-500 text-white";
-    }
-    if (roleLower === "manager") {
-      return "bg-indigo-500 text-white";
-    }
-    return "bg-emerald-500 text-white";
-  };
+  /** Notification badge — always primary green */
+  const getBadgeColor = () => "bg-primary text-primary-foreground";
 
   return (
     <header className="bg-card/90 backdrop-blur-md border-b border-border h-16 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 shadow-xs select-none">

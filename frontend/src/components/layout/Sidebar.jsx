@@ -62,27 +62,12 @@ export default function Sidebar({
   const userInitial = getInitials(name);
   const activeRole = role || userRole;
 
-  const getAvatarBg = () => {
-    const roleLower = activeRole?.toLowerCase();
-    if (roleLower === "admin" || roleLower === "hr_admin") {
-      return "bg-teal-600 text-white font-bold";
-    }
-    if (roleLower === "manager") {
-      return "bg-indigo-600 text-white font-bold";
-    }
-    return "bg-emerald-600 text-white font-bold";
-  };
+  /** Avatar fallback — unified primary green for all roles */
+  const getAvatarBg = () => "bg-primary text-primary-foreground font-bold";
 
-  const getActiveStyles = () => {
-    const roleLower = activeRole?.toLowerCase();
-    if (roleLower === "admin" || roleLower === "hr_admin") {
-      return "bg-teal-600 text-white shadow-md shadow-teal-900/30";
-    }
-    if (roleLower === "manager") {
-      return "bg-indigo-600 text-white shadow-md shadow-indigo-900/30";
-    }
-    return "bg-emerald-600 text-white shadow-md shadow-emerald-900/30";
-  };
+  /** Active nav item — primary green for all roles (matches design board) */
+  const getActiveStyles = () =>
+    "bg-primary text-primary-foreground shadow-sm shadow-primary/30";
 
   return (
     <aside
@@ -119,37 +104,40 @@ export default function Sidebar({
           {items.map((item) => {
             const Icon = item.icon;
             return (
-              <Tooltip key={item.route}>
-                <TooltipTrigger asChild>
-                  <NavLink
-                    to={item.route}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                        isActive
-                          ? getActiveStyles()
-                          : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      }`
-                    }
-                  >
-                    <Icon className="w-5 h-5 shrink-0" />
-                    <span
-                      className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                        isExpanded ? "opacity-100 max-w-full" : "opacity-0 max-w-0"
-                      }`}
+              <div key={item.route}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <NavLink
+                      to={item.route}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                          isActive
+                            ? getActiveStyles()
+                            : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        }`
+                      }
+                    >
+                      <Icon className="w-5 h-5 shrink-0" />
+                      <span
+                        className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                          isExpanded ? "opacity-100 max-w-full" : "opacity-0 max-w-0"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                    </NavLink>
+                  </TooltipTrigger>
+                  {!isExpanded && (
+                    <TooltipContent
+                      side="right"
+                      className="bg-sidebar text-sidebar-foreground border border-sidebar-border text-xs py-1.5 px-3 rounded-lg shadow-xl"
                     >
                       {item.label}
-                    </span>
-                  </NavLink>
-                </TooltipTrigger>
-                {!isExpanded && (
-                  <TooltipContent
-                    side="right"
-                    className="bg-sidebar text-sidebar-foreground border border-sidebar-border text-xs py-1.5 px-3 rounded-lg shadow-xl"
-                  >
-                    {item.label}
-                  </TooltipContent>
-                )}
-              </Tooltip>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </div>
+
             );
           })}
         </nav>

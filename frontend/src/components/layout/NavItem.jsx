@@ -3,16 +3,10 @@ import { NavLink } from "react-router-dom";
 export default function NavItem({ item, role = "", onClick = null }) {
   const Icon = item.icon;
 
-  const getActiveStyles = () => {
-    const roleLower = role?.toLowerCase();
-    if (roleLower === "admin" || roleLower === "hr_admin") {
-      return "bg-teal-600 text-white shadow-lg shadow-teal-900/30";
-    }
-    if (roleLower === "manager") {
-      return "bg-indigo-600 text-white shadow-lg shadow-indigo-900/30";
-    }
-    return "bg-emerald-600 text-white shadow-lg shadow-emerald-900/30";
-  };
+  /** Active nav item — primary green for all roles (matches design board) */
+  const getActiveStyles = () =>
+    "bg-primary text-primary-foreground shadow-sm shadow-primary/30";
+
 
   return (
     <NavLink
