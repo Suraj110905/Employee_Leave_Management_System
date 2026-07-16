@@ -154,7 +154,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           title="Approved This Month"
-          value={stats?.activeLeavesCount ?? 0}
+          value={stats?.approvedThisMonth ?? 0}
           icon={CheckCircle}
           description="Leave approvals"
           colorClass="bg-primary/10 text-primary border-primary/20"

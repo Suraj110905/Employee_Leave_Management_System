@@ -1,0 +1,52 @@
+version: "3.9"
+
+# =============================================================================
+# LeavePortal – Full-Stack Docker Compose
+# Services: api (Node.js backend) + client (Nginx-served React frontend)
+# Usage:
+#   Development : docker compose up
+#   Production  : docker compose -f docker-compose.yml up --build -d
+# =============================================================================
+
+services:
+  # ── Backend API (Express + Node.js) ─────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: leaveportal-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - leaveportal-net
+
+  # ── Frontend (React + Vite → Nginx static serve) ────────────────────────────
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: leaveportal-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - leaveportal-net
+
+networks:
+  leaveportal-net:
+    driver: bridge

@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Initialize: restore cached sessions on page reloads/initial loads
+  // Initialize: restore cached sessions on page reloads/initial loads & handle auto logout
   useEffect(() => {
     const initializeAuth = async () => {
       const token = getAccessToken();
@@ -40,7 +40,16 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     };
 
+    const handleAuthExpired = () => {
+      setUser(null);
+    };
+
     initializeAuth();
+    window.addEventListener("auth-expired", handleAuthExpired);
+    
+    return () => {
+      window.removeEventListener("auth-expired", handleAuthExpired);
+    };
   }, []);
 
   /**
@@ -77,6 +86,22 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  /**
+   * Updates user profile in active session context.
+   */
+  const updateProfile = async (profileData) => {
+    setLoading(true);
+    try {
+      const data = await authService.updateProfile(profileData);
+      setUser(data.user);
+      setLoading(false);
+      return data.user;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
@@ -84,6 +109,7 @@ export const AuthProvider = ({ children }) => {
     error,
     login,
     logout,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

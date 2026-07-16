@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { authService } from "@/services/authService";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,14 +16,14 @@ import SectionHeader from "@/components/dashboard/SectionHeader";
  * @component
  */
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [profileData, setProfileData] = useState({
-    name: user?.name || "John Doe",
-    email: user?.email || "john.doe@company.com",
-    phone: "+1 (555) 234-5678",
-    emailAlerts: true,
-    smsAlerts: false,
-    pushAlerts: true,
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    emailAlerts: user?.emailAlerts ?? true,
+    smsAlerts: user?.smsAlerts ?? false,
+    pushAlerts: user?.pushAlerts ?? true,
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -36,7 +37,21 @@ export default function Profile() {
   const [uploadingPic, setUploadingPic] = useState(false);
   const [feedback, setFeedback] = useState({ profile: "", password: "" });
 
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        emailAlerts: user.emailAlerts ?? true,
+        smsAlerts: user.smsAlerts ?? false,
+        pushAlerts: user.pushAlerts ?? true,
+      });
+    }
+  }, [user]);
+
   const getInitials = (name) => {
+    if (!name) return "U";
     return name
       .split(" ")
       .map((n) => n[0])
@@ -44,17 +59,27 @@ export default function Profile() {
       .toUpperCase();
   };
 
-  const handleProfileSubmit = (e) => {
+  const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setSavingProfile(true);
     setFeedback((prev) => ({ ...prev, profile: "" }));
-    setTimeout(() => {
-      setSavingProfile(false);
+    try {
+      await updateProfile({
+        name: profileData.name,
+        phone: profileData.phone,
+        emailAlerts: profileData.emailAlerts,
+        smsAlerts: profileData.smsAlerts,
+        pushAlerts: profileData.pushAlerts,
+      });
       setFeedback((prev) => ({ ...prev, profile: "Profile details updated successfully!" }));
-    }, 1200);
+    } catch (err) {
+      setFeedback((prev) => ({ ...prev, profile: err.message || "Failed to update profile details." }));
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setFeedback((prev) => ({ ...prev, password: "Passwords do not match." }));
@@ -62,11 +87,15 @@ export default function Profile() {
     }
     setSavingPassword(true);
     setFeedback((prev) => ({ ...prev, password: "" }));
-    setTimeout(() => {
-      setSavingPassword(false);
+    try {
+      await authService.changePassword(passwordData.currentPassword, passwordData.newPassword);
       setFeedback((prev) => ({ ...prev, password: "Password changed successfully!" }));
       setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    }, 1200);
+    } catch (err) {
+      setFeedback((prev) => ({ ...prev, password: err.message || "Failed to change password credentials." }));
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   const handlePicUpload = (e) => {

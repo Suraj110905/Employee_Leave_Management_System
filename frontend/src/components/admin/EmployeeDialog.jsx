@@ -28,7 +28,7 @@ export default function EmployeeDialog({
     role: "employee",
     department: "Engineering",
     designation: "",
-    manager: "",
+    managerId: "",
   });
 
   const [errorMsg, setErrorMsg] = useState("");
@@ -42,7 +42,7 @@ export default function EmployeeDialog({
         role: employee.role || "employee",
         department: employee.department || "Engineering",
         designation: employee.designation || "",
-        manager: employee.manager || "",
+        managerId: employee.managerId || "",
       });
     } else {
       setFormData({
@@ -51,7 +51,7 @@ export default function EmployeeDialog({
         role: "employee",
         department: "Engineering",
         designation: "",
-        manager: "",
+        managerId: "",
       });
     }
     setErrorMsg("");
@@ -229,15 +229,15 @@ export default function EmployeeDialog({
 
             {/* Direct Manager */}
             <div className="space-y-1">
-              <label htmlFor="manager" className="block text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              <label htmlFor="managerId" className="block text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
                 Direct Manager
               </label>
               <input
                 type="text"
-                id="manager"
-                name="manager"
+                id="managerId"
+                name="managerId"
                 disabled={loading}
-                value={formData.manager}
+                value={formData.managerId}
                 onChange={handleChange}
                 placeholder="Sarah Hansen (MGR-20015)"
                 className="w-full p-2.5 rounded-xl border border-border bg-accent/20 focus:bg-accent/30 text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-ring"

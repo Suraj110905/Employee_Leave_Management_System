@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Layout components
@@ -16,7 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/constants/routes";
 import { ROLES } from "@/constants/roles";
 import { SIDEBAR_ITEMS } from "@/constants/sidebar";
-import { DUMMY_NOTIFICATIONS } from "@/data/notifications";
+import { notificationService } from "@/services/mock/notificationService";
 
 // Lazy loading all page views
 const Login = lazy(() => import("@/pages/auth/Login"));
@@ -61,21 +61,53 @@ function LoadingSpinner() {
   );
 }
 
-/**
- * DashboardLayoutWrapper context resolver.
- * Feeds current authenticated user and navigation config objects dynamically into layouts.
- */
 function DashboardLayoutWrapper() {
   const { user, logout } = useAuth();
   const role = user?.role || ROLES.EMPLOYEE;
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchNotifications = async () => {
+      try {
+        const res = await notificationService.getNotifications({ status: "unread" });
+        setNotifications(res.data);
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+      }
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000); // refresh every 10s
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await notificationService.markAsRead(id);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications([]);
+    } catch (err) {
+      console.error("Failed to mark all notifications as read:", err);
+    }
+  };
 
   return (
     <DashboardLayout
       user={user}
-      notifications={DUMMY_NOTIFICATIONS}
+      notifications={notifications}
       role={role}
       sidebarItems={SIDEBAR_ITEMS[role] || []}
       onLogout={logout}
+      onMarkNotificationAsRead={handleMarkAsRead}
+      onMarkAllNotificationsAsRead={handleMarkAllAsRead}
     />
   );
 }

@@ -8,6 +8,7 @@ import {
   HelpCircle,
   LogOut,
   ChevronDown,
+  Check,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,8 @@ export default function Topbar({
   notifications = [],
   onToggleSidebar = () => {},
   onLogout = () => {},
+  onMarkNotificationAsRead = () => {},
+  onMarkAllNotificationsAsRead = () => {},
 }) {
   const {
     name = "User",
@@ -52,7 +55,7 @@ export default function Topbar({
   };
 
   const userInitial = getInitials(name);
-  const unreadCount = (notifications || []).filter((n) => !n.read).length;
+  const unreadCount = (notifications || []).length;
 
   /** Topbar avatar — unified primary green for all roles */
   const getAvatarBg = () => "bg-primary/15 text-primary border-primary/20";
@@ -97,17 +100,70 @@ export default function Topbar({
       {/* Right Section: Alerts and account details */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Notification bell with count badge */}
-        <button
-          className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors relative cursor-pointer"
-          aria-label="Notifications"
-        >
-          <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <span className={`absolute top-1.5 right-1.5 min-w-4 h-4 rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border border-card shadow-sm ${getBadgeColor()}`}>
-              {unreadCount}
-            </span>
-          )}
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors relative cursor-pointer focus:outline-none"
+              aria-label="Notifications"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className={`absolute top-1.5 right-1.5 min-w-4 h-4 rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border border-card shadow-sm ${getBadgeColor()}`}>
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="bottom"
+            align="end"
+            sideOffset={8}
+            className="w-80 sm:w-96 bg-popover border border-border text-popover-foreground rounded-xl p-1.5 shadow-md flex flex-col max-h-[400px] overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-2 py-1.5">
+              <span className="text-xs font-bold text-foreground">Notifications</span>
+              {unreadCount > 0 && (
+                <button
+                  onClick={onMarkAllNotificationsAsRead}
+                  className="text-[10px] text-primary hover:underline font-semibold cursor-pointer"
+                >
+                  Mark all as read
+                </button>
+              )}
+            </div>
+            <DropdownMenuSeparator />
+            <div className="flex-1 overflow-y-auto space-y-1 py-1 max-h-[300px] pr-0.5 scrollbar-thin">
+              {notifications.length === 0 ? (
+                <div className="py-8 text-center flex flex-col items-center justify-center gap-2">
+                  <span className="text-2xl">☕</span>
+                  <p className="text-xs font-semibold text-muted-foreground">All caught up!</p>
+                </div>
+              ) : (
+                notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-accent/40 transition-colors group relative"
+                  >
+                    <div className="flex-1 text-left space-y-0.5 min-w-0">
+                      <p className="text-xs font-bold text-foreground truncate">{n.title}</p>
+                      <p className="text-[11px] text-muted-foreground leading-normal break-words">{n.message}</p>
+                      <p className="text-[9px] text-muted-foreground/60 font-semibold">
+                        {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => onMarkNotificationAsRead(n.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all cursor-pointer absolute right-2 top-2"
+                      title="Mark as read"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Theme Toggle (UI only) */}
         <button

@@ -36,13 +36,7 @@ export default function TeamCalendarWidget({
       // Check if this employee matches active calendar filters
       if (filters.employeeId && member.id !== filters.employeeId) return;
 
-      const activeLeaves = member.id === "EMP-10024"
-        ? [{ start: "2026-07-15", end: "2026-07-20", status: "Pending", type: "Annual" }]
-        : member.id === "EMP-10025"
-        ? [{ start: "2026-07-12", end: "2026-07-13", status: "Approved", type: "Sick" }]
-        : member.id === "EMP-10027"
-        ? [{ start: "2026-07-25", end: "2026-07-27", status: "Pending", type: "Annual" }]
-        : [];
+      const activeLeaves = member.activeLeaves || [];
 
       activeLeaves.forEach((leave) => {
         if (filters.leaveType && leave.type.toLowerCase() !== filters.leaveType.toLowerCase()) return;

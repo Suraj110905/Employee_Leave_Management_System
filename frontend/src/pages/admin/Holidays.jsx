@@ -57,8 +57,7 @@ export default function Holidays() {
     setSubmitting(true);
     try {
       if (selectedHoliday) {
-        // Mock update in memory (simulated success)
-        alert(`Holiday modified: ${formData.name}`);
+        await adminService.updateHoliday(selectedHoliday._id || selectedHoliday.id, formData);
       } else {
         await adminService.createHoliday(formData);
       }
@@ -96,8 +95,10 @@ export default function Holidays() {
         ? "badge badge-approved"
         : "badge badge-cancelled";
 
+    const id = h._id || h.id;
+
     return (
-      <tr key={h.id} className="hover:bg-accent/20 transition-colors">
+      <tr key={id} className="hover:bg-accent/20 transition-colors">
         <td className="px-6 py-3.5 font-bold text-foreground">{h.name}</td>
         <td className="px-4 py-3.5 font-semibold text-muted-foreground">
           {new Date(h.date).toLocaleDateString("en-US", {
@@ -122,7 +123,7 @@ export default function Holidays() {
               <Pencil className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => handleDelete(h.id)}
+              onClick={() => handleDelete(id)}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
               title="Remove Holiday"
             >

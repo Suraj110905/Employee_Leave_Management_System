@@ -27,10 +27,21 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Standard error parsing
+// Response Interceptor: Standard error parsing & auto logout on 401
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      // Clear corrupt or expired tokens
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("refresh_token");
+      
+      // Trigger a global custom event to notify AuthContext to clear active session state
+      window.dispatchEvent(new CustomEvent("auth-expired"));
+    }
+    
     // Normalise error outputs for simple components mapping
     const customError = {
       message: error.response?.data?.message || error.message || "An unexpected error occurred",

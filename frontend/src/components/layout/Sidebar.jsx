@@ -104,7 +104,7 @@ export default function Sidebar({
           {items.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.route}>
+              <div key={`${item.route}-${item.label}`}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <NavLink
@@ -161,7 +161,7 @@ export default function Sidebar({
                       {name}
                     </p>
                     <p className="text-[10px] text-sidebar-foreground/60 truncate leading-none">
-                      {user.label || activeRole}
+                      {user?.label || activeRole}
                     </p>
                   </div>
                 )}

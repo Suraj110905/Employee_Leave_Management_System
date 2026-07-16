@@ -13,10 +13,11 @@ export default function DepartmentSummary({ roster = [] }) {
   const departmentName = roster[0]?.department || "Department";
   const headcount = roster.length;
   
-  // Calculate mock attendance values for the department summary panel
-  const onLeaveCount = roster.filter((m) =>
-    m.leavesHistory.some((l) => l.status === "Approved" && l.id === "LV-098")
-  ).length || 1;
+  // Calculate active attendance metrics for the department summary panel safely
+  const onLeaveCount = roster.filter((m) => {
+    const leaves = m.activeLeaves || m.leavesHistory || [];
+    return leaves.some((l) => l.status === "Approved");
+  }).length;
 
   const activeCount = Math.max(0, headcount - onLeaveCount);
   const availabilityPercentage = headcount > 0 ? Math.round((activeCount / headcount) * 100) : 100;

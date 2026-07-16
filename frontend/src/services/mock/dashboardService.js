@@ -1,46 +1,5 @@
 import apiClient from "@/lib/axios";
 
-// Mock Database Records
-const MOCK_BALANCES = [
-  { type: "Annual", total: 15, used: 3, available: 12 },
-  { type: "Sick", total: 10, used: 2, available: 8 },
-  { type: "Casual", total: 8, used: 4, available: 4 },
-  { type: "Maternity", total: 30, used: 0, available: 30 },
-];
-
-const MOCK_LEAVES = [
-  {
-    id: "LV-102",
-    type: "Annual",
-    start: "2026-07-15",
-    end: "2026-07-20",
-    days: 5,
-    status: "Pending",
-    manager: "Sarah Hansen",
-    reason: "Family vacation",
-  },
-  {
-    id: "LV-098",
-    type: "Sick",
-    start: "2026-06-10",
-    end: "2026-06-11",
-    days: 1,
-    status: "Approved",
-    manager: "Sarah Hansen",
-    reason: "Medical checkup",
-  },
-  {
-    id: "LV-085",
-    type: "Casual",
-    start: "2026-05-02",
-    end: "2026-05-03",
-    days: 2,
-    status: "Rejected",
-    manager: "Sarah Hansen",
-    reason: "Personal errands",
-  },
-];
-
 const MOCK_ANNOUNCEMENTS = [
   {
     id: "ann-1",
@@ -58,25 +17,9 @@ const MOCK_ANNOUNCEMENTS = [
   },
 ];
 
-const MOCK_HOLIDAYS = [
-  { name: "Independence Day", date: "2026-07-04" },
-  { name: "Labor Day", date: "2026-09-07" },
-  { name: "Thanksgiving Day", date: "2026-11-26" },
-];
-
-const MOCK_USAGE_DATA = [
-  { month: "Jan", days: 1 },
-  { month: "Feb", days: 0 },
-  { month: "Mar", days: 2 },
-  { month: "Apr", days: 3 },
-  { month: "May", days: 2 },
-  { month: "Jun", days: 1 },
-  { month: "Jul", days: 5 },
-];
-
 /**
- * Mock Service layer for Employee Dashboard data operations.
- * Easily swappable with backend Axios endpoints.
+ * Service layer for Employee Dashboard data operations.
+ * Communicates with backend Axios endpoints.
  */
 export const dashboardService = {
   /**
@@ -85,28 +28,65 @@ export const dashboardService = {
    * @returns {Promise<object>} Dashboard metrics.
    */
   getDashboardData: async (userId) => {
-    // REAL BACKEND API PATHWAY:
-    // const response = await apiClient.get(`/dashboard/employee/${userId}`);
-    // return response.data;
+    // Query backend resources concurrently
+    const [balancesRes, leavesRes, holidaysRes] = await Promise.all([
+      apiClient.get("/leaves/balances"),
+      apiClient.get("/leaves?limit=10"),
+      apiClient.get("/leaves/holidays/list"),
+    ]);
 
-    // Simulate API network latency
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const balances = balancesRes.data.data;
+    const leavesList = leavesRes.data.data.data || [];
+    const holidays = holidaysRes.data.data || [];
 
-    // Optional error simulation: if userId === "error", trigger recovery states
-    if (userId === "error") {
-      throw new Error("Unable to retrieve dashboard stats. Database connection timeout.");
-    }
+    const pendingCount = leavesList.filter((l) => l.status === "Pending").length;
+    const approvedCount = leavesList.filter((l) => l.status === "Approved").length;
+    const rejectedCount = leavesList.filter((l) => l.status === "Rejected").length;
 
-    const pendingCount = MOCK_LEAVES.filter((l) => l.status === "Pending").length;
-    const approvedCount = MOCK_LEAVES.filter((l) => l.status === "Approved").length;
-    const rejectedCount = MOCK_LEAVES.filter((l) => l.status === "Rejected").length;
+    // Build usage data chart logs dynamically from real leaves list
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const usageMap = {};
+    monthNames.forEach((m) => (usageMap[m] = 0));
+
+    leavesList.forEach((leave) => {
+      if (leave.status === "Approved") {
+        const monthIdx = new Date(leave.startDate).getMonth();
+        const monthName = monthNames[monthIdx];
+        usageMap[monthName] += leave.workingDays || 0;
+      }
+    });
+
+    const usageData = monthNames.map((m) => ({
+      month: m,
+      days: usageMap[m],
+    }));
+
+    // Format leaves to match frontend layout keys
+    const leaves = leavesList.map((l) => ({
+      id: l.id,
+      type: l.leaveType,
+      start: l.startDate,
+      end: l.endDate,
+      days: l.workingDays,
+      status: l.status,
+      manager: l.reviewer || "System",
+      reason: l.reason,
+    }));
 
     return {
-      balances: MOCK_BALANCES,
-      leaves: MOCK_LEAVES,
+      balances: balances.map((b) => ({
+        type: b.type,
+        total: b.total,
+        used: b.used,
+        available: b.available,
+      })),
+      leaves,
       announcements: MOCK_ANNOUNCEMENTS,
-      holidays: MOCK_HOLIDAYS,
-      usageData: MOCK_USAGE_DATA,
+      holidays: holidays.map((h) => ({
+        name: h.name,
+        date: h.date,
+      })),
+      usageData,
       summary: {
         pendingCount,
         approvedCount,
@@ -121,11 +101,7 @@ export const dashboardService = {
    * @returns {Promise<{success: boolean}>} Outcome confirmation.
    */
   cancelLeaveRequest: async (leaveId) => {
-    // REAL BACKEND API PATHWAY:
-    // const response = await apiClient.post(`/leaves/cancel/${leaveId}`);
-    // return response.data;
-
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await apiClient.patch(`/leaves/${leaveId}/cancel`);
     return { success: true };
   },
 };

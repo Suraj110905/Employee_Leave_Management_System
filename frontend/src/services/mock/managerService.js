@@ -1,262 +1,167 @@
-import { MOCK_TEAM_MEMBERS, MOCK_APPROVALS, MOCK_NOTIFICATIONS, MOCK_ANALYTICS } from "@/data/managerMock";
-import { LEAVE_STATUS } from "@/constants/dashboard";
-
-let localApprovalsDataset = [...MOCK_APPROVALS];
-let localNotifications = [...MOCK_NOTIFICATIONS];
+import apiClient from "@/lib/axios";
 
 /**
- * Helper to simulate network delay (500ms to 900ms).
- *
- * @returns {number} Delay in milliseconds.
- */
-const getRandomDelay = () => {
-  return Math.floor(Math.random() * (900 - 500 + 1) + 500);
-};
-
-/**
- * Service Layer mimicking Express API Manager operations.
+ * Service Layer calling Express API Manager operations.
  */
 export const managerService = {
   /**
    * Retrieves summary KPIs for the manager's dashboard.
-   *
-   * @param {string} managerId - Manager ID.
-   * @returns {Promise<Object>} KPI counters.
    */
   getDashboardStats: async (managerId) => {
-    // REAL BACKEND API PATHWAY:
-    // GET /api/v1/manager/stats?managerId=...
-    await new Promise((resolve) => setTimeout(resolve, getRandomDelay()));
-
-    const pending = localApprovalsDataset.filter((r) => r.status === LEAVE_STATUS.PENDING).length;
-    const approved = localApprovalsDataset.filter((r) => r.status === LEAVE_STATUS.APPROVED).length;
-    const rejected = localApprovalsDataset.filter((r) => r.status === LEAVE_STATUS.REJECTED).length;
-
-    return {
-      pendingCount: pending,
-      approvedThisMonth: approved,
-      rejectedThisMonth: rejected,
-      onLeaveTodayCount: 1,
-      upcomingLeavesCount: 2,
-      teamAvailabilityPercentage: 88,
-    };
+    const response = await apiClient.get("/manager/dashboard");
+    return response.data.data;
   },
 
   /**
    * Fetches paginated, filtered, and sorted leave approvals.
-   *
-   * @param {string} managerId - Manager ID.
-   * @param {Object} options - Query filters and sorting configurations.
-   * @param {number} [options.page=1] - Current page number.
-   * @param {number} [options.limit=10] - Items per page.
-   * @param {string} [options.sortBy='appliedAt'] - Sort field key.
-   * @param {string} [options.sortOrder='desc'] - Sort direction.
-   * @param {Object} [options.filters] - Query selectors to restrict match.
-   * @param {string} [options.filters.status] - Approval status filter value.
-   * @param {string} [options.filters.leaveType] - Leave type filter value.
-   * @param {string} [options.filters.search] - Employee name search keyword.
-   * @returns {Promise<{data: Array, total: number, page: number, limit: number, totalPages: number}>}
    */
   getApprovals: async (managerId, options = {}) => {
-    // REAL BACKEND API PATHWAY:
-    // GET /api/v1/manager/approvals
-    await new Promise((resolve) => setTimeout(resolve, getRandomDelay()));
-
     const {
       page = 1,
       limit = 10,
-      sortBy = "appliedAt",
+      sortBy = "createdAt",
       sortOrder = "desc",
       filters = {},
     } = options;
 
-    let items = [...localApprovalsDataset];
-
-    // 1. Filter by status
-    if (filters.status) {
-      items = items.filter((l) => l.status.toLowerCase() === filters.status.toLowerCase());
-    }
-
-    // 2. Filter by type
-    if (filters.leaveType) {
-      items = items.filter((l) => l.leaveType.toLowerCase() === filters.leaveType.toLowerCase());
-    }
-
-    // 3. Filter by search name (case-insensitive)
-    if (filters.search) {
-      const keyword = filters.search.toLowerCase();
-      items = items.filter((l) => l.employeeName?.toLowerCase().includes(keyword));
-    }
-
-    // 4. Sort results
-    items.sort((a, b) => {
-      let valA = a[sortBy] ?? "";
-      let valB = b[sortBy] ?? "";
-
-      if (typeof valA === "string") {
-        return sortOrder === "asc"
-          ? valA.localeCompare(valB)
-          : valB.localeCompare(valA);
-      }
-
-      return sortOrder === "asc" ? valA - valB : valB - valA;
-    });
-
-    // 5. Paginate results
-    const total = items.length;
-    const totalPages = Math.max(1, Math.ceil(total / limit));
-    const offset = (page - 1) * limit;
-    const paginatedItems = items.slice(offset, offset + limit);
-
-    return {
-      data: paginatedItems,
-      total,
+    const params = {
       page,
       limit,
-      totalPages,
+      sortBy,
+      sortOrder,
+      status: filters.status,
+      leaveType: filters.leaveType,
+      search: filters.search,
+    };
+
+    const response = await apiClient.get("/manager/leave-requests", { params });
+    const result = response.data.data;
+
+    return {
+      data: (result.data || []).map((l) => ({
+        id: l.id,
+        employeeId: l.employeeId,
+        employeeName: l.employeeName || "",
+        leaveType: l.leaveType,
+        startDate: l.startDate,
+        endDate: l.endDate,
+        workingDays: l.workingDays,
+        status: l.status,
+        reason: l.reason,
+        appliedAt: l.createdAt,
+        remarks: l.remarks || "",
+        reviewer: l.reviewer || "",
+        reviewedAt: l.reviewedAt || null,
+        currentStage: l.currentStage || 1,
+        totalStages: l.totalStages || 1,
+        approvedBy: l.approvedBy || [],
+        rejectedBy: l.rejectedBy || null,
+      })),
+      total: result.total || 0,
+      page: result.page || page,
+      limit: result.limit || limit,
+      totalPages: result.totalPages || 1,
     };
   },
 
   /**
-   * Approves a pending leave request, handling multi-level validation stages.
-   *
-   * @param {string} leaveId - Request ID.
-   * @param {string} managerId - Reviewer Manager ID.
-   * @param {string} remarks - Approval comments remarks.
-   * @returns {Promise<Object>} Updated request details.
+   * Approves a pending leave request.
    */
   approveRequest: async (leaveId, managerId, remarks) => {
-    // REAL BACKEND API PATHWAY:
-    // POST /api/v1/manager/approvals/:id/approve
-    await new Promise((resolve) => setTimeout(resolve, getRandomDelay()));
-
-    const idx = localApprovalsDataset.findIndex((r) => r.id === leaveId);
-    if (idx === -1) throw new Error("Leave request not found.");
-
-    const target = localApprovalsDataset[idx];
-    if (target.status !== LEAVE_STATUS.PENDING) {
-      throw new Error("Only pending requests can be reviewed.");
-    }
-
-    // Multi-level approval stage handling
-    const nextApprovedBy = [...target.approvedBy, `Sarah Hansen (${managerId})`];
-    const isCompleted = target.currentStage === target.totalStages;
-
-    const updated = {
-      ...target,
-      status: isCompleted ? LEAVE_STATUS.APPROVED : LEAVE_STATUS.PENDING,
-      currentStage: isCompleted ? target.currentStage : target.currentStage + 1,
-      approvedBy: nextApprovedBy,
-      reviewer: `Sarah Hansen (${managerId})`,
-      reviewedAt: new Date().toISOString(),
-      remarks: remarks || "Approved.",
-      updatedAt: new Date().toISOString(),
-    };
-
-    localApprovalsDataset = [
-      ...localApprovalsDataset.slice(0, idx),
-      updated,
-      ...localApprovalsDataset.slice(idx + 1),
-    ];
-
-    return updated;
+    const response = await apiClient.patch(`/manager/leave-requests/${leaveId}/approve`, { remarks });
+    return response.data.data;
   },
 
   /**
-   * Rejects a leave request (mandates remarks).
-   *
-   * @param {string} leaveId - Request ID.
-   * @param {string} managerId - Reviewer Manager ID.
-   * @param {string} remarks - Rejection reason remarks.
-   * @returns {Promise<Object>} Updated request details.
+   * Rejects a leave request.
    */
   rejectRequest: async (leaveId, managerId, remarks) => {
-    // REAL BACKEND API PATHWAY:
-    // POST /api/v1/manager/approvals/:id/reject
-    if (!remarks || remarks.trim().length < 10) {
-      throw new Error("Rejection comments must be at least 10 characters.");
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, getRandomDelay()));
-
-    const idx = localApprovalsDataset.findIndex((r) => r.id === leaveId);
-    if (idx === -1) throw new Error("Leave request not found.");
-
-    const target = localApprovalsDataset[idx];
-    if (target.status !== LEAVE_STATUS.PENDING) {
-      throw new Error("Only pending requests can be reviewed.");
-    }
-
-    const updated = {
-      ...target,
-      status: LEAVE_STATUS.REJECTED,
-      rejectedBy: managerId,
-      reviewer: `Sarah Hansen (${managerId})`,
-      reviewedAt: new Date().toISOString(),
-      remarks: remarks.trim(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    localApprovalsDataset = [
-      ...localApprovalsDataset.slice(0, idx),
-      updated,
-      ...localApprovalsDataset.slice(idx + 1),
-    ];
-
-    return updated;
+    const response = await apiClient.patch(`/manager/leave-requests/${leaveId}/reject`, { remarks });
+    return response.data.data;
   },
 
   /**
-   * Retrieves active team profiles roster.
-   *
-   * @param {string} managerId - Manager ID.
-   * @returns {Promise<Array>} Roster array list.
+   * Retrieves active team profiles roster and embeds their active calendar leaves.
    */
   getTeamRoster: async (managerId) => {
-    // REAL BACKEND API PATHWAY:
-    // GET /api/v1/manager/team?managerId=...
-    await new Promise((resolve) => setTimeout(resolve, getRandomDelay()));
-    return MOCK_TEAM_MEMBERS;
+    const [rosterRes, calendarRes] = await Promise.all([
+      apiClient.get("/manager/team"),
+      // Query calendar for a broad range around current months (e.g. June to August 2026)
+      apiClient.get("/manager/calendar?startDate=2026-06-01&endDate=2026-08-30"),
+    ]);
+
+    const roster = rosterRes.data.data.data || [];
+    const events = calendarRes.data.data || [];
+
+    return roster.map((member) => {
+      const memberLeaves = events
+        .filter((ev) => ev.employeeId === member.employeeId)
+        .map((ev) => ({
+          start: ev.startDate,
+          end: ev.endDate,
+          status: ev.status,
+          type: ev.leaveType,
+        }));
+
+      return {
+        id: member.employeeId,
+        employeeId: member.employeeId,
+        name: member.name,
+        email: member.email,
+        role: member.role,
+        department: member.department,
+        designation: member.designation,
+        phone: member.phone || "",
+        avatar: member.avatar,
+        activeLeaves: memberLeaves,
+      };
+    });
   },
 
   /**
-   * Retrieves notification lists alerts.
-   *
-   * @returns {Promise<Array>} Notifications.
+   * Retrieves notification list alerts.
    */
   getNotifications: async () => {
-    // REAL BACKEND API PATHWAY:
-    // GET /api/v1/manager/notifications
-    await new Promise((resolve) => setTimeout(resolve, getRandomDelay()));
-    return localNotifications;
+    const response = await apiClient.get("/notifications?status=unread");
+    return response.data.data.data || [];
   },
 
   /**
    * Marks a specific notification as read.
-   *
-   * @param {string} id - Notification ID.
-   * @returns {Promise<boolean>}
    */
   markAsRead: async (id) => {
-    // REAL BACKEND API PATHWAY:
-    // POST /api/v1/manager/notifications/:id/read
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    localNotifications = localNotifications.map((n) =>
-      n.id === id ? { ...n, read: true } : n
-    );
+    await apiClient.patch(`/notifications/${id}`);
     return true;
   },
 
   /**
    * Retrieves analytics data structures.
-   *
-   * @returns {Promise<Object>} Analytics charts data.
    */
   getAnalyticsMocks: async () => {
-    // REAL BACKEND API PATHWAY:
-    // GET /api/v1/manager/analytics
-    await new Promise((resolve) => setTimeout(resolve, getRandomDelay()));
-    return MOCK_ANALYTICS;
+    // Return matching layout schema for dashboard charts
+    return {
+      monthlyTrends: [
+        { month: "Jan", approved: 2, rejected: 1 },
+        { month: "Feb", approved: 1, rejected: 0 },
+        { month: "Mar", approved: 3, rejected: 1 },
+        { month: "Apr", approved: 2, rejected: 2 },
+        { month: "May", approved: 4, rejected: 0 },
+        { month: "Jun", approved: 3, rejected: 1 },
+        { month: "Jul", approved: 5, rejected: 0 },
+      ],
+      distribution: [
+        { name: "Annual", value: 45 },
+        { name: "Sick", value: 25 },
+        { name: "Casual", value: 20 },
+        { name: "Maternity", value: 10 },
+      ],
+      departmentLeaveRate: [
+        { name: "Engineering", rate: 12 },
+        { name: "Product Design", rate: 8 },
+        { name: "Operations", rate: 15 },
+        { name: "Human Resources", rate: 5 },
+      ],
+    };
   },
 };
 

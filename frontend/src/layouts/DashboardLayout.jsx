@@ -17,6 +17,8 @@ export default function DashboardLayout({
   role = "",
   sidebarItems = [],
   onLogout = () => {},
+  onMarkNotificationAsRead = () => {},
+  onMarkAllNotificationsAsRead = () => {},
 }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const location = useLocation();
@@ -76,6 +78,8 @@ export default function DashboardLayout({
           notifications={notifications}
           onToggleSidebar={() => setMobileSidebarOpen(true)}
           onLogout={onLogout}
+          onMarkNotificationAsRead={onMarkNotificationAsRead}
+          onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
         />
 
         {/* Nested routing child content viewport */}
